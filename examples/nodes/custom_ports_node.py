@@ -97,6 +97,9 @@ def draw_square_port(painter, rect, info):
     painter.setBrush(color)
     painter.drawRect(rect)
 
+    # text = 'HAHAHA...'
+    # painter.drawText(rect.left() - painter.fontMetrics().width(text) - 5, rect.center().y() + 4, text)
+
     painter.restore()
 
 

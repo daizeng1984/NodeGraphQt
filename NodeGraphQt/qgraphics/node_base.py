@@ -18,6 +18,33 @@ from NodeGraphQt.qgraphics.node_overlay_disabled import XDisabledItem
 from NodeGraphQt.qgraphics.node_text_item import NodeTextItem
 from NodeGraphQt.qgraphics.port import PortItem, CustomPortItem
 
+class MyText(QtWidgets.QGraphicsTextItem):
+    def __init__(self, text, type, parent):
+        super(MyText, self).__init__(text, parent);
+        self._type = QtWidgets.QGraphicsTextItem(type, parent)
+        self._type.font().setPointSize(8)
+        self._type.setFont(self.font())
+        
+    def setPos(self, x, y):
+        super(MyText, self).setPos(x, y);
+        self._type.setPos(x, y + super().boundingRect().height()/2)
+    def setDefaultTextColor(self, color):
+        super(MyText, self).setDefaultTextColor(color);
+        self._type.setDefaultTextColor(color.darker())
+
+    def boundingRect(self):
+        rect = super(MyText, self).boundingRect();
+        font = self.font()
+        font_metrics = QtGui.QFontMetrics(font)
+        item_text = self._type.toPlainText()
+        if hasattr(font_metrics, 'horizontalAdvance'):
+            font_width = font_metrics.horizontalAdvance(item_text)
+        else:
+            font_width = font_metrics.width(item_text)
+        rect.setHeight(rect.height() + font_metrics.height());
+        rect.setWidth(max(font_width, rect.width()))
+        return rect;
+
 
 class NodeItem(AbstractNodeItem):
     """
@@ -911,7 +938,8 @@ class NodeItem(AbstractNodeItem):
         Returns:
             PortItem: port qgraphics item.
         """
-        text = QtWidgets.QGraphicsTextItem(port.name, self)
+
+        text = MyText(port.name, 'IN-----?????????????' if port.port_type == PortTypeEnum.IN.value else 'OUT!!!!!!!!!!!!!!', self); #QtWidgets.QGraphicsTextItem('hello', self)
         text.font().setPointSize(8)
         text.setFont(text.font())
         text.setVisible(port.display_name)

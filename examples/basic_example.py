@@ -5,6 +5,12 @@ import signal
 
 from Qt import QtCore, QtWidgets
 
+import sys
+nodegraphqt_path = os.path.abspath('../')
+if nodegraphqt_path not in sys.path:
+    print(nodegraphqt_path)
+    sys.path.insert(0, nodegraphqt_path)
+
 from NodeGraphQt import (
     NodeGraph,
     PropertiesBinWidget,
@@ -12,8 +18,52 @@ from NodeGraphQt import (
     NodesPaletteWidget
 )
 
+from NodeGraphQt.constants import (
+    NodePropWidgetEnum,
+    LayoutDirectionEnum
+)
+
+
 # import example nodes from the "example_nodes" package
 from nodes import basic_nodes, custom_ports_node, group_node, widget_nodes
+
+from NodeGraphQt import BaseNode, BaseNodeCircle
+
+# from NodeGraphQt.qgraphics.node_port_in import PortInputNodeItem
+
+# class PortInputNodeItemExt(PortInputNodeItem):
+#     def __init__(self, text, parent = None):
+#         super(PortInputNodeItem, self).__init__(text, parent)
+
+
+class MyBasicNode(BaseNode):
+    """
+    A node class with 2 inputs and 2 outputs.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'nodes.basic'
+
+    # initial default node name.
+    NODE_NAME = 'node A'
+
+    def __init__(self):
+        super(MyBasicNode, self).__init__()
+
+        self.set_layout_direction(LayoutDirectionEnum.VERTICAL.value)
+        # create node inputs.
+        self.add_input('in A')
+
+        # create node outputs.
+        self.add_output('out A')
+        self.create_property(
+            'TESTEST',
+            value= None,
+            widget_type=NodePropWidgetEnum.QLABEL.value,
+            tab='test'
+        )
+        
+
 
 if __name__ == '__main__':
 
@@ -32,6 +82,7 @@ if __name__ == '__main__':
 
     # registered example nodes.
     graph.register_nodes([
+        MyBasicNode,
         basic_nodes.BasicNodeA,
         basic_nodes.BasicNodeB,
         basic_nodes.CircleNode,
@@ -48,6 +99,10 @@ if __name__ == '__main__':
     graph_widget.show()
 
     # create node with custom text color and disable it.
+    n_basic_a_gai = graph.create_node(
+        'nodes.basic.MyBasicNode', text_color='#feab20')
+    n_basic_a_gai.set_disabled(False)
+
     n_basic_a = graph.create_node(
         'nodes.basic.BasicNodeA', text_color='#feab20')
     n_basic_a.set_disabled(True)

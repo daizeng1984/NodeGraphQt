@@ -41,7 +41,7 @@ class PortItem(QtWidgets.QGraphicsItem):
     def boundingRect(self):
         return QtCore.QRectF(0.0, 0.0,
                              self._width + PortEnum.CLICK_FALLOFF.value,
-                             self._height)
+                             self._height + 10)
 
     def paint(self, painter, option, widget):
         """
