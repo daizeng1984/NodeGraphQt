@@ -16,14 +16,9 @@ class PortInputNodeItem(NodeItem):
     """
 
     def __init__(self, name='group port', parent=None):
-        super(PortInputNodeItem, self).__init__('hello', parent)
+        super(PortInputNodeItem, self).__init__(name, parent)
         self._icon_item.setVisible(False)
         self._text_item.set_locked(True)
-
-        self._text_extra_info = NodeTextItem("HELLO", self)
-        self._text_extra_info.set_locked(True)
-        self._text_extra_info.setVisible(True)
-        
         self._x_item.text = 'Port Locked'
 
     def _set_base_size(self, add_w=0.0, add_h=0.0):
@@ -52,14 +47,6 @@ class PortInputNodeItem(NodeItem):
             text_rect.width() + 10,
             text_rect.height()
         )
-        extra_info = self._text_extra_info.boundingRect() 
-        extra_info = QtCore.QRectF(
-            rect.center().x() - (text_rect.width() / 2) - 5,
-            rect.top() +10 + margin,
-            text_rect.width() + 10,
-            text_rect.height() + 10
-        )
-        
 
         painter.setBrush(QtGui.QColor(255, 255, 255, 20))
         painter.drawRoundedRect(rect, 20, 20)
@@ -120,6 +107,7 @@ class PortInputNodeItem(NodeItem):
             text_rect.width() + 10,
             text_rect.height()
         )
+
         painter.setBrush(QtGui.QColor(255, 255, 255, 20))
         painter.drawRoundedRect(rect, 20, 20)
 
@@ -190,7 +178,8 @@ class PortInputNodeItem(NodeItem):
                 text.setVisible(visible)
 
         self._text_item.setVisible(visible)
-        self._text_extra_info.setVisible(True)
+        if self._subtext_item is not None:
+            self._subtext_item.setVisible(visible)
 
     def _align_label_horizontal(self, h_offset, v_offset):
         rect = self.boundingRect()
@@ -198,7 +187,9 @@ class PortInputNodeItem(NodeItem):
         x = rect.center().x() - (text_rect.width() / 2)
         y = rect.center().y() - (text_rect.height() / 2)
         self._text_item.setPos(x + h_offset, y + v_offset)
-        self._text_extra_info.setPos(x + h_offset, y + v_offset)
+        if self._subtext_item is not None:
+            self._subtext_item.setPos(x + h_offset, y + v_offset + text_rect.height())
+        
 
     def _align_label_vertical(self, h_offset, v_offset):
         rect = self.boundingRect()

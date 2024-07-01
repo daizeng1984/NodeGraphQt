@@ -31,6 +31,9 @@ class MyText(QtWidgets.QGraphicsTextItem):
     def setDefaultTextColor(self, color):
         super(MyText, self).setDefaultTextColor(color);
         self._type.setDefaultTextColor(color.darker())
+    def setVisible(self, visible):
+        super().setVisible(visible)
+        self._type.setVisible(visible)
 
     def boundingRect(self):
         rect = super(MyText, self).boundingRect();
@@ -67,6 +70,7 @@ class NodeItem(AbstractNodeItem):
         self._icon_item = QtWidgets.QGraphicsPixmapItem(pixmap, self)
         self._icon_item.setTransformationMode(QtCore.Qt.SmoothTransformation)
         self._text_item = NodeTextItem(self.name, self)
+        self._subtext_item = NodeTextItem("WORLD --------", self)
         self._x_item = XDisabledItem(self, 'DISABLED')
         self._input_items = OrderedDict()
         self._output_items = OrderedDict()
@@ -91,8 +95,11 @@ class NodeItem(AbstractNodeItem):
             if self.layout_direction is LayoutDirectionEnum.VERTICAL.value:
                 for text_item in self._input_items.values():
                     text_item.setVisible(False)
+                    self._subtext_item.setVisible(False)
                 for text_item in self._output_items.values():
                     text_item.setVisible(False)
+                    self._subtext_item.setVisible(False)
+                    
 
     def _paint_horizontal(self, painter, option, widget):
         painter.save()
@@ -335,6 +342,7 @@ class NodeItem(AbstractNodeItem):
         for port, text in self._output_items.items():
             text.setDefaultTextColor(text_color)
         self._text_item.setDefaultTextColor(text_color)
+        self._subtext_item.setDefaultTextColor(text_color.darker())
 
     def activate_pipes(self):
         """
@@ -366,7 +374,7 @@ class NodeItem(AbstractNodeItem):
     def _calc_size_horizontal(self):
         # width, height from node name text.
         text_w = self._text_item.boundingRect().width()
-        text_h = self._text_item.boundingRect().height()
+        text_h = self._text_item.boundingRect().height() + self._subtext_item.boundingRect().height() + 20
 
         # width, height from node ports.
         port_width = 0.0
@@ -512,12 +520,16 @@ class NodeItem(AbstractNodeItem):
         text_rect = self._text_item.boundingRect()
         x = rect.center().x() - (text_rect.width() / 2)
         self._text_item.setPos(x + h_offset, rect.y() + v_offset)
+        subtext_rect = self._subtext_item.boundingRect()
+        self._subtext_item.setPos(x + h_offset, text_rect.bottom() + v_offset )
 
     def _align_label_vertical(self, h_offset, v_offset):
         rect = self._text_item.boundingRect()
         x = self.boundingRect().right() + h_offset
         y = self.boundingRect().center().y() - (rect.height() / 2) + v_offset
         self.text_item.setPos(x, y)
+        self._subtext_item.setPos(x, y + 10)
+        
 
     def align_label(self, h_offset=0.0, v_offset=0.0):
         """
@@ -673,7 +685,7 @@ class NodeItem(AbstractNodeItem):
             raise RuntimeError('Node graph layout direction not valid!')
 
     def _draw_node_horizontal(self):
-        height = self._text_item.boundingRect().height() + 4.0
+        height = self._text_item.boundingRect().height() + 4.0 
 
         # update port text items in visibility.
         for port, text in self._input_items.items():
@@ -700,7 +712,7 @@ class NodeItem(AbstractNodeItem):
         # arrange input and output ports.
         self.align_ports(v_offset=height)
         # arrange node widgets
-        self.align_widgets(v_offset=height)
+        self.align_widgets(v_offset=height + self._subtext_item.boundingRect().height())
 
         self.update()
 
@@ -815,7 +827,9 @@ class NodeItem(AbstractNodeItem):
                 text.setVisible(port_text_visible)
 
         self._text_item.setVisible(visible)
+        self._subtext_item.setVisible(visible)
         self._icon_item.setVisible(visible)
+
 
     @property
     def icon(self):
